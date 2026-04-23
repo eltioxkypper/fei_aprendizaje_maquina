@@ -1,11 +1,19 @@
-import pandas as pd
-import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
-from sklearn.tree import DecisionTreeClassifier, plot_tree
-from sklearn.metrics import confusion_matrix, accuracy_score, recall_score, precision_score
+# =============================================================================
+# UNIVERSIDAD VERACRUZANA - FACULTAD DE ESTADÍSTICA E INFORMÁTICA
+# EXPERIENCIA EDUCATIVA: INTELIGENCIA ARTIFICIAL
+# DOCENTE: MAX W. MILLÁN MARTÍNEZ
+# TEMA: ÁRBOLES DE DECISIÓN (AUDITORÍA Y MÉTRICAS)
+# =============================================================================
 
-# 1. Preparación de un Dataset Sintético (Ejemplo de Aprobados/Reprobados)
-# Atributos: [Entregó Tareas (0=No, 1=Sí), Asistió a Asesoría (0=No, 1=Sí)]
+# 1. IMPORTACIÓN DE LIBRERÍAS
+import pandas as pd # Manejo de datos en tablas (DataFrames)
+import matplotlib.pyplot as plt # Generación de gráficos y visualizaciones
+from sklearn.model_selection import train_test_split # Divide datos en Entrenamiento y Prueba
+from sklearn.tree import DecisionTreeClassifier, plot_tree # El algoritmo del árbol y su graficador
+from sklearn.metrics import confusion_matrix, accuracy_score, recall_score, precision_score # Métricas de auditoría [cite: 3]
+
+# 2. PREPARACIÓN DEL DATASET (100 REGISTROS)
+# Usamos datos etiquetados: contienen características (features) y el resultado esperado (target)[cite: 3].
 data = {
     'Tareas':       [1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0],
     'Asesoria':     [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],
@@ -14,35 +22,47 @@ data = {
 }
 
 df = pd.DataFrame(data)
-X = df[['Tareas', 'Asesoria', 'Asistencia']]
-y = df['Aprobo']
+X = df[['Tareas', 'Asesoria', 'Asistencia']] # Variables independientes (Features)
+y = df['Aprobo'] # Variable dependiente (Target/Etiqueta) [cite: 3]
 
-# 2. División de datos: Entrenamiento (Train) y Prueba (Test) 
+# 3. DIVISIÓN DEL DATASET
+# test_size=0.2 separa 20% para examen y 80% para aprendizaje.
+# random_state=42 es la semilla que garantiza que el experimento sea reproducible siempre[cite: 3].
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# 3. Creación y entrenamiento del Árbol de Decisión
-# Usamos 'entropy' como criterio y limitamos la profundidad (Poda) para evitar Overfitting 
+# 4. CONFIGURACIÓN Y ENTRENAMIENTO DEL MODELO
+# criterion='entropy': Usa la Entropía para medir el desorden y elegir el Nodo Raíz[cite: 3].
+# max_depth=3: Aplica la técnica de Poda (Pruning) para evitar el Sobreajuste (Overfitting)[cite: 3].
 modelo_arbol = DecisionTreeClassifier(criterion='entropy', max_depth=3, random_state=42)
+
+# .fit inicia el proceso donde el modelo "estudia" el dataset de entrenamiento.
 modelo_arbol.fit(X_train, y_train)
 
-# 4. Predicciones y Auditoría con Métricas 
+# 5. PREDICCIÓN Y AUDITORÍA (MÉTRICAS)
+# El modelo intenta predecir el resultado de los datos de prueba que nunca ha visto.
 y_pred = modelo_arbol.predict(X_test)
 
-print("--- Métricas de Evaluación ---")
+print("--- AUDITORÍA DE MÉTRICAS ---")
+# Exactitud: Proporción total de aciertos sobre el total de casos analizados.
 print(f"Exactitud (Accuracy): {accuracy_score(y_test, y_pred)}")
-print(f"Sensibilidad (Recall): {recall_score(y_test, y_pred)}") # 
-print(f"Precisión (Precision): {precision_score(y_test, y_pred)}") # 
 
-# 5. Visualización de la Matriz de Confusión 
-print("\nMatriz de Confusión:")
+# Sensibilidad (Recall): Capacidad de identificar correctamente todos los casos positivos reales[cite: 3].
+print(f"Sensibilidad (Recall): {recall_score(y_test, y_pred)}") 
+
+# Precisión (Precision): Mide la calidad de las predicciones positivas hechas por el modelo[cite: 3].
+print(f"Precisión (Precision): {precision_score(y_test, y_pred)}") 
+
+# 6. MATRIZ DE CONFUSIÓN
+# Muestra visualmente los Verdaderos Positivos, Verdaderos Negativos, Falsos Positivos y Falsos Negativos[cite: 3].
+print("\nMATRIZ DE CONFUSIÓN:")
 print(confusion_matrix(y_test, y_pred))
 
-# 6. Visualización del Árbol (Estructura Binaria)
-plt.figure(figsize=(10,6))
-plot_tree(modelo_arbol,   
+# 7. VISUALIZACIÓN DEL ÁRBOL BINARIO
+plt.figure(figsize=(12,8))
+plot_tree(modelo_arbol, 
           feature_names=['Tareas', 'Asesoria', 'Asistencia'], 
-          class_names=['Reprobado', 'Aprobado'], 
-          filled=True, 
+          class_names=['Reprobado', 'Aprobado'], # Representa la predicción final en el Nodo Hoja[cite: 3].
+          filled=True, # El color indica la pureza del nodo (azul=Aprobado, naranja=Reprobado).
           rounded=True)
-plt.title("Visualización del Árbol de Decisión (IA)")
-plt.savefig('arbol_ia.png')
+plt.title("Estructura Jerárquica del Árbol de Decisión - FEI UV")
+plt.show()
